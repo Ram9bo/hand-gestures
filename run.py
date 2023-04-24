@@ -1,13 +1,10 @@
 import cv2
 import mediapipe as mp
-from mediapipe.tasks import python
-from mediapipe.tasks.python import vision
-
-# @markdown We implemented some functions to visualize the hand landmark detection results. <br/> Run the following cell to activate the functions.
-
+import numpy as np
 from mediapipe import solutions
 from mediapipe.framework.formats import landmark_pb2
-import numpy as np
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
 
 MARGIN = 10  # pixels
 FONT_SIZE = 1
@@ -76,6 +73,7 @@ if __name__ == '__main__':
             print('Right hand is index', i)
             right_hand_index = i
 
+    print(detection_result)
     x = np.mean([land.x for land in detection_result.hand_landmarks[right_hand_index]])
     y = np.mean([land.y for land in detection_result.hand_landmarks[right_hand_index]])
     print(f"({x}, {y})")
