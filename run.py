@@ -1,14 +1,15 @@
+import time
+
 import cv2
 import mediapipe as mp
 import numpy as np
+from mediapipe import ImageFormat
 from mediapipe import solutions
 from mediapipe.framework.formats import landmark_pb2
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
+
 from direction import detect_direction
-from mediapipe import ImageFormat
-import time
-import PIL
 
 MARGIN = 10  # pixels
 FONT_SIZE = 1
@@ -90,8 +91,9 @@ if __name__ == '__main__':
         image = frame
         frame = mp.Image(image_format=ImageFormat.SRGB, data=frame)
         gesture, landmarks, annotated = detector.detect(frame)
-        annotated = PIL.Image.fromarray(np.uint8(annotated))
-        annotated.show()
+        cv2.imshow("Annotated", annotated)
+        im_cnt = time.time()
+        cv2.waitKey(1)
 
         print("Gesture", gesture)
         if len(landmarks) > 0:
