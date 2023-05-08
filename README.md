@@ -7,12 +7,12 @@ opencv-python==4.7.0.72
 paramiko
 
 # Commannds
-- Forward
-- Backward
-- Left in place
-- Left backwards
-- Left forwards
-- Right in place
-- Right backwards
-- Right forwards
-- Stop
+- Forward (C)
+- Backward (C)
+- Left in place (K)
+- Left backwards (C)
+- Left forwards (K)
+- Right in place (K)
+- Right backwards (C)
+- Right forwards (K)
+- Stop (C)
