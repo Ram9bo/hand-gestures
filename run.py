@@ -11,6 +11,27 @@ FONT_SIZE = 1
 FONT_THICKNESS = 1
 HANDEDNESS_TEXT_COLOR = (88, 205, 54)  # vibrant green
 
+class Detector:
+
+    def __init__(self):
+        self.base_options = python.BaseOptions(model_asset_path='gesture_recognizer.task')
+        self.options = vision.GestureRecognizerOptions(base_options=self.base_options)
+        self.recognizer = vision.GestureRecognizer.create_from_options(self.options)
+
+
+    def detect(self, image):
+        result = self.recognizer.recognize(image)
+        landmarks = dict()
+
+        top_gesture = result.gestures[0][0]
+
+        for i in range(21):
+            landmark = result.hand_landmarks[0][i]
+            landmarks[i] = np.array([landmark.x, landmark.y])
+
+        return top_gesture.category_name, landmarks
+
+
 
 def draw_landmarks_on_image(rgb_image, detection_result):
     hand_landmarks_list = detection_result.hand_landmarks
@@ -50,41 +71,8 @@ def draw_landmarks_on_image(rgb_image, detection_result):
 
 
 if __name__ == '__main__':
-    # STEP 1: Import the necessary modules.
-
-    # STEP 2: Create an ImageClassifier object.
-    base_options = python.BaseOptions(model_asset_path='hand_landmarker.task')
-    options = vision.HandLandmarkerOptions(base_options=base_options,
-                                           num_hands=2)
-    detector = vision.HandLandmarker.create_from_options(options)
-
-    # STEP 3: Load the input image.
-    image = mp.Image.create_from_file("woman_hands.jpg")
-
-    print("Step 4")
-    # STEP 4: Detect hand landmarks from the input image.
-    detection_result = detector.detect(image)
-
-    right_hand_index = None
-    for i, res in enumerate(detection_result.handedness):
-        hand = res[0]
-        print(hand)
-        if hand.category_name == 'Left':
-            print('Right hand is index', i)
-            right_hand_index = i
-
-    print(detection_result)
-    x = np.mean([land.x for land in detection_result.hand_landmarks[right_hand_index]])
-    y = np.mean([land.y for land in detection_result.hand_landmarks[right_hand_index]])
-    print(f"({x}, {y})")
-
-    print("Step 5")
-    # STEP 5: Process the classification result. In this case, visualize it.
-    try:
-        annotated_image = draw_landmarks_on_image(image.numpy_view(), detection_result)
-    except Exception as e:
-        print(e)
-    print("here")
-    cv2.imshow("gesture", cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR))
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+   detector = Detector()
+   image = mp.Image.create_from_file("thumbs_down.png")
+   gesture, landmarks = detector.detect(image)
+   print("Gesture", gesture)
+   print("Landmarks", landmarks)
