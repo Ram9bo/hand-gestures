@@ -21,10 +21,28 @@ class Detector:
 
     def __init__(self):
         self.base_options = python.BaseOptions(model_asset_path='gesture_recognizer.task')
-        self.options = vision.GestureRecognizerOptions(base_options=self.base_options)
+        self.options = vision.GestureRecognizerOptions(base_options=self.base_options, num_hands=2)
         self.recognizer = vision.GestureRecognizer.create_from_options(self.options)
+        base_options = python.BaseOptions(model_asset_path='hand_landmarker.task')
+        options = vision.HandLandmarkerOptions(base_options=base_options,num_hands=2)
+        self.detector = vision.HandLandmarker.create_from_options(options)
 
     def detect(self, image):
+        result = self.detector.detect(image)
+        landmarks = dict()
+
+        if len(result.hand_landmarks) <= 0:
+            return "None", landmarks, image.numpy_view()
+
+        for i in range(21):
+            landmark = result.hand_landmarks[0][i]
+            landmarks[i] = np.array([landmark.x, landmark.y])
+
+        annotated_image = draw_landmarks_on_image(image.numpy_view(), result, "None")
+
+        return "None", landmarks, annotated_image
+
+    def recognize(self, image):
         result = self.recognizer.recognize(image)
         landmarks = dict()
 
@@ -39,16 +57,20 @@ class Detector:
             landmark = result.hand_landmarks[0][i]
             landmarks[i] = np.array([landmark.x, landmark.y])
 
-        annotated_image = draw_landmarks_on_image(image, result)
+        annotated_image = draw_landmarks_on_image(image.numpy_view(), result, top_gesture.category_name)
 
         return top_gesture.category_name, landmarks, annotated_image
 
 
 
-def draw_landmarks_on_image(rgb_image, detection_result):
+def draw_landmarks_on_image(rgb_image, detection_result, gesture):
   hand_landmarks_list = detection_result.hand_landmarks
   handedness_list = detection_result.handedness
   annotated_image = np.copy(rgb_image)
+  if (len(hand_landmarks_list)) == 2:
+      print("2 hands")
+
+    #print(len(hand_landmarks_list))
 
   # Loop through the detected hands to visualize.
   for idx in range(len(hand_landmarks_list)):
@@ -60,7 +82,7 @@ def draw_landmarks_on_image(rgb_image, detection_result):
     hand_landmarks_proto.landmark.extend([
       landmark_pb2.NormalizedLandmark(x=landmark.x, y=landmark.y, z=landmark.z) for landmark in hand_landmarks
     ])
-    annotated_image = annotated_image.item().numpy_view()
+    #annotated_image = annotated_image.item().numpy_view()
     solutions.drawing_utils.draw_landmarks(
       annotated_image,
       hand_landmarks_proto,
@@ -75,9 +97,18 @@ def draw_landmarks_on_image(rgb_image, detection_result):
     text_x = int(min(x_coordinates) * width)
     text_y = int(min(y_coordinates) * height) - MARGIN
 
+    for i, l in enumerate(hand_landmarks):
+        h_x = int(hand_landmarks[i].x * width)
+        h_y = int(hand_landmarks[i].y * height)
+        cv2.putText(annotated_image, str(i), (h_x, h_y), cv2.FONT_HERSHEY_DUPLEX, FONT_SIZE, HANDEDNESS_TEXT_COLOR, FONT_THICKNESS, cv2.LINE_AA)
+
     # Draw handedness (left or right hand) on the image.
     cv2.putText(annotated_image, f"{handedness[0].category_name}",
                 (text_x, text_y), cv2.FONT_HERSHEY_DUPLEX,
+                FONT_SIZE, HANDEDNESS_TEXT_COLOR, FONT_THICKNESS, cv2.LINE_AA)
+
+    cv2.putText(annotated_image, str(gesture),
+                (text_x, int(text_y - 20 * FONT_SIZE)), cv2.FONT_HERSHEY_DUPLEX,
                 FONT_SIZE, HANDEDNESS_TEXT_COLOR, FONT_THICKNESS, cv2.LINE_AA)
 
   return annotated_image
@@ -96,7 +127,6 @@ if __name__ == '__main__':
         frame = mp.Image(image_format=ImageFormat.SRGB, data=frame)
         gesture, landmarks, annotated = detector.detect(frame)
         cv2.imshow("Annotated", annotated)
-        im_cnt = time.time()
         cv2.waitKey(1)
 
         if gesture != prev_gesture:
