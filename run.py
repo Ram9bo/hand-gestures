@@ -1,6 +1,7 @@
 import cv2
 import mediapipe as mp
 from direction import detect_direction
+import numpy as np
 
 def detect_hands(image, hands):
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -27,7 +28,7 @@ def detect_hands(image, hands):
             # Draw the landmarks on the image
             mp.solutions.drawing_utils.draw_landmarks(image, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS)
             for landmark in hand_landmarks.landmark:
-                landmarks.append((landmark.x, landmark.y))
+                landmarks.append(np.array([landmark.x, landmark.y]))
 
             marks.append(landmarks)
 
@@ -58,7 +59,7 @@ if __name__ == '__main__':
 
     while True:
         ret, frame = cap.read()
-        frame, all_landmarks = detect_hands(frame)
+        frame, all_landmarks = detect_hands(frame, hands)
         # Display the image with landmarks
         cv2.imshow('Hand Landmarks', frame)
         cv2.waitKey(1)
@@ -80,3 +81,5 @@ if __name__ == '__main__':
                     angle += fingers
                 elif direction == "left":
                     angle -= fingers
+
+                    
