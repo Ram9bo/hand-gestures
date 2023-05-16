@@ -61,7 +61,6 @@ if __name__ == '__main__':
 
         speed = 0
         angle = 0
-
         if len(all_landmarks) > 0:
             direction = detect_direction(all_landmarks)
             print("Direction", direction)
@@ -76,5 +75,8 @@ if __name__ == '__main__':
                     angle += fingers
                 elif direction == "left":
                     angle -= fingers
+
+        print("speed: ", speed)
+        print("angle: ", angle)
 
                     

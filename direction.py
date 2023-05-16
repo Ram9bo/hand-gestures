@@ -8,19 +8,6 @@ def detect_direction(all_landmarks):
         tips = [4, 8, 12, 16, 20]
         midfinger = [2, 6, 10, 14, 18]
         lower_finger = [2, 5, 9, 13, 17]
-
-        # for tip in tips:
-        #     print("tip number: ", tip)
-        #     print("coordinates: ", hand_landmarks[tip])
-        #     vect = hand_landmarks[tip]-hand_landmarks[0]
-        #     print("vector: ", vect)
-        #     coord = np.argmax(np.abs(vect))
-        #     coord = coord + 2 if vect[coord] < 0 else coord
-        #     direction = directions[coord]
-        #     print("direction: ", direction)
-        # import pdb; pdb.set_trace()
-
-
         wrist_pos = hand_landmarks[0]
         big_dist = 0
         big_vect = None
@@ -35,7 +22,7 @@ def detect_direction(all_landmarks):
                 for j in range(i+1, len(tips)):
                     dist1 = np.linalg.norm(tip_pos-hand_landmarks[midfinger[j]])
                     dist2 = np.linalg.norm(tip_pos-hand_landmarks[lower_finger[j]])
-                    if dist1 < thumb_length or dist2 < thumb_length:
+                    if dist1 < thumb_length * 0.6 or dist2 < thumb_length * 0.6:
                         extended_thumb = False
                         break
                 extended_counter += int(extended_thumb)
