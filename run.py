@@ -83,11 +83,15 @@ def draw_landmarks_on_image(rgb_image, detection_result):
   return annotated_image
 
 if __name__ == '__main__':
-    vid = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(0)
+    cap.set(3, 1280)
+    cap.set(4, 720)
     detector = Detector()
 
+    prev_gesture = None
+    prev_direction = None
     while True:
-        ret, frame = vid.read()
+        ret, frame = cap.read()
         image = frame
         frame = mp.Image(image_format=ImageFormat.SRGB, data=frame)
         gesture, landmarks, annotated = detector.detect(frame)
@@ -95,8 +99,12 @@ if __name__ == '__main__':
         im_cnt = time.time()
         cv2.waitKey(1)
 
-        print("Gesture", gesture)
+        if gesture != prev_gesture:
+            print("Gesture", gesture)
+            prev_gesture = gesture
         if len(landmarks) > 0:
+            direction = detect_direction(landmarks)
             print("Direction", detect_direction(landmarks))
-        else:
-            print(landmarks)
+            if prev_direction != direction:
+                pass
+            prev_direction = direction
