@@ -12,18 +12,13 @@ def detect_hands(image, hands):
     # Process the image
     results = mp_hands.process(image_rgb)
 
-    if len(hands) == 1:
-        for i, h in enumerate(results.handedness):
-            if hands[0] in h[0].display_name:
-                filtered_hand_landmarks = results.multi_hand_landmarks[i]
-                break
-    else:
-        filtered_hand_landmarks = results.multi_hand_landmarks
-
     marks = []
     # Check if landmarks were detected
-    if filtered_hand_landmarks:
-        for hand_landmarks in filtered_hand_landmarks:
+    if results.multi_hand_landmarks:
+        for i, hand_landmarks in enumerate(results.multi_hand_landmarks):
+            handedness = results.multi_handedness[i].classification[0].label
+            if handedness not in hands:
+                continue
             landmarks = []
             # Draw the landmarks on the image
             mp.solutions.drawing_utils.draw_landmarks(image, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS)
@@ -49,13 +44,13 @@ if __name__ == '__main__':
         print("Type which hand you want to use for gesture control: (L / R)")
         hand = input().lower()
         if (hand == "l" or hand == "left"):
-            hands = ["L"]
+            hands = ["Right"]
         elif (hand == "r" or hand == "right"):
-            hands = ["R"]
+            hands = ["Left"]
         else:
             raise TypeError("The input received doesn't correspond to a hand")
     else:
-        hands = ["L", "R"]
+        hands = ["Left", "Right"]
 
     while True:
         ret, frame = cap.read()
