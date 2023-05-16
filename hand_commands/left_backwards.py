@@ -43,24 +43,25 @@ if voltageOut > voltageIn:
 else:
     maxPower = voltageOut / float(voltageIn)
     
-speed = 0.8
+driveRight = 0.9
+driveLeft = 0.6
 angle = 90
 timeSpin360   = 1.7   # Number of seconds needed to make a full left...
-numSeconds = (angle / 360.0) * timeSpin360
-try:
-
+numSeconds = 10 * timeSpin360
+def PerformMove(driveLeft, driveRight, numSeconds):
     # Set the motors to the new speeds
-    ZB.SetMotor1(0.9) # Rear right
-    ZB.SetMotor2(0.9) # Front right
-    ZB.SetMotor3(0.6) # Front left
-    ZB.SetMotor4(0.6) # Rear left
+    ZB.SetMotor1(driveRight) # Rear right
+    ZB.SetMotor2(driveRight) # Front right
+    ZB.SetMotor3(driveLeft) # Front left
+    ZB.SetMotor4(driveLeft) # Rear left
 
-    time.sleep(4.8)
+    time.sleep(numSeconds)
     print(numSeconds)
 
     ZB.MotorsOff()
+    
+PerformMove(driveLeft, driveRight, numSeconds)
 
-except e:
-    ZB.MotorsOff()
+
     
 
