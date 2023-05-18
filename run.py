@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 from direction import detect_direction
 import numpy as np
+from ps_connect import send_command
 
 def detect_hands(image, hands):
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -31,7 +32,7 @@ def detect_hands(image, hands):
     return image, marks
 
 
-if __name__ == '__main__':
+if __name__=='__main__':
     cap = cv2.VideoCapture(0)
     cap.set(3, 1280)
     cap.set(4, 720)
@@ -75,8 +76,6 @@ if __name__ == '__main__':
                     angle += fingers
                 elif direction == "left":
                     angle -= fingers
-
-        print("speed: ", speed)
-        print("angle: ", angle)
+        send_command(speed, angle)
 
                     
