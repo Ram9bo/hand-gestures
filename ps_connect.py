@@ -2,7 +2,7 @@ import paramiko
 
 def send_command(speed, angle):
 
-    hostname = "192.168.36.47"
+    hostname = "192.168.101.252"
     username = 'pi'
     password = 'raspberry'
     dir_path = '/home/pi/picar-4wd/final_project/control.py'
