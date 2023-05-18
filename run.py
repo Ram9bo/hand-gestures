@@ -3,6 +3,7 @@ import mediapipe as mp
 from direction import detect_direction
 import numpy as np
 from ps_connect import send_command
+import paramiko
 
 def detect_hands(image, hands):
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -33,6 +34,26 @@ def detect_hands(image, hands):
 
 
 if __name__=='__main__':
+    hostname = "192.168.101.252"
+    username = 'pi'
+    password = 'raspberry'
+    dir_path = '/home/pi/picar-4wd/final_project/control.py'
+    command = 'python3 ' + dir_path
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(hostname,username=username,password=password)
+        # print("Connected to %s" % hostname)
+        # print("first try: ", time.time()-start)
+        # start = time.time()
+    except paramiko.AuthenticationException:
+        print("Failed to connect to %s due to wrong username/password" %hostname)
+        exit(1)
+    except Exception as e:
+        print(e.message)    
+        exit(2)
+        
+
     cap = cv2.VideoCapture(0)
     cap.set(3, 1280)
     cap.set(4, 720)
@@ -53,6 +74,8 @@ if __name__=='__main__':
     else:
         hands = ["Left", "Right"]
 
+    prev_speed = 0
+    prev_angle = 0
     while True:
         ret, frame = cap.read()
         frame, all_landmarks = detect_hands(frame, hands)
@@ -76,6 +99,9 @@ if __name__=='__main__':
                     angle += fingers
                 elif direction == "left":
                     angle -= fingers
-        send_command(speed, angle)
+        if speed != prev_speed or angle != prev_angle:
+            send_command(speed, angle, ssh, command)
+        prev_speed = speed
+        prev_angle = angle
 
                     
