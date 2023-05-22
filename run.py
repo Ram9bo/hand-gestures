@@ -34,7 +34,7 @@ def detect_hands(image, hands):
 
 
 if __name__=='__main__':
-    hostname = "192.168.101.252"
+    hostname = "192.168.43.67"
     username = 'pi'
     password = 'raspberry'
     dir_path = '/home/pi/picar-4wd/final_project/control.py'
