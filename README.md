@@ -1,4 +1,4 @@
-# Gesture Controlled Robot
+## Gesture Controlled Robot
 
 # Dependencies
 
