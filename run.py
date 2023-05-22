@@ -50,7 +50,7 @@ if __name__=='__main__':
         print("Failed to connect to %s due to wrong username/password" %hostname)
         exit(1)
     except Exception as e:
-        print(e.message)    
+        print(e)    
         exit(2)
         
 
@@ -99,6 +99,9 @@ if __name__=='__main__':
                     angle += fingers
                 elif direction == "left":
                     angle -= fingers
+        speed = np.clip(speed, -5, 5)
+        angle = np.clip(angle, -5, 5)
+        
         if speed != prev_speed or angle != prev_angle:
             send_command(speed, angle, ssh, command)
         prev_speed = speed

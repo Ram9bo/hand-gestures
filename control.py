@@ -33,30 +33,14 @@ try:
 	except:
 		print("Incorrect values for speed and angle")
 	
-	positive_speeds = np.linspace(30, 100, 5)
-	negative_speeds = np.linspace(-100, -30, 5)
+	speeds = np.concatenate([[0],np.linspace(30, 100, 5)])
+	angles = np.concatenate([[0],np.linspace(7, 15, 5)])
 	
-	positive_angles = np.linspace(7, 15, 5)
-	negative_angles = np.linspace(-15, -7, 5)
-	
-
-	if speed < 0:
-		actual_speed = negative_speeds[5+speed]
-	elif speed > 0:
-		actual_speed = positive_speeds[speed-1]
-	else:
-		actual_speed = 0
+	sign = 1 if speed == 0 else np.sign(speed)
+	actual_speed = speeds[np.abs(speed)] * sign
+	diff = angles[angle] * (np.abs(speed) + 1) * sign * np.sign(angle)
 		
 	print("Actual speed: ", actual_speed)
-	sign = 1 if speed == 0 else np.sign(speed)
-	
-	if angle < 0:
-		diff = negative_angles[5+angle] * (np.abs(speed) + 1) * sign
-	elif angle > 0:
-		diff = positive_angles[angle-1]  * (np.abs(speed) + 1) * sign
-	else:
-		diff = 0	
-	
 	print("Diff: ", diff)
 	
 	
