@@ -5,9 +5,6 @@ import numpy as np
 
 
 def move_turn(power, diff):
-	print("pow-diff", power-diff)
-	print("pow+diff", power+diff)
-	
 	fc.left_front.set_power(power + diff)
 	fc.left_rear.set_power(power + diff)
 	fc.right_front.set_power(power - diff)
@@ -28,8 +25,6 @@ try:
 	try:
 		speed = int(sys.argv[2])
 		angle = int(sys.argv[4])
-		print("Speed: ", speed)
-		print("Angle: ", angle)
 	except:
 		print("Incorrect values for speed and angle")
 	
@@ -39,10 +34,6 @@ try:
 	sign = 1 if speed == 0 else np.sign(speed)
 	actual_speed = speeds[np.abs(speed)] * sign
 	diff = angles[angle] * (np.abs(speed) + 1) * sign * np.sign(angle)
-		
-	print("Actual speed: ", actual_speed)
-	print("Diff: ", diff)
-	
 	
 	move_turn(actual_speed, diff)	
 	

@@ -43,9 +43,6 @@ if __name__=='__main__':
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(hostname,username=username,password=password)
-        # print("Connected to %s" % hostname)
-        # print("first try: ", time.time()-start)
-        # start = time.time()
     except paramiko.AuthenticationException:
         print("Failed to connect to %s due to wrong username/password" %hostname)
         exit(1)
@@ -87,7 +84,6 @@ if __name__=='__main__':
         angle = 0
         if len(all_landmarks) > 0:
             direction = detect_direction(all_landmarks)
-            print("Direction", direction)
             for hand_command in direction:
                 direction = hand_command[0]
                 fingers = hand_command[1]
