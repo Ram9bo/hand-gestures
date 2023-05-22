@@ -2,8 +2,16 @@ import cv2
 import mediapipe as mp
 from direction import detect_direction
 import numpy as np
-from ps_connect import send_command
 import paramiko
+import argparse
+
+def send_command(speed, angle, ssh, command):
+    command += f' --speed {speed} --angle {angle}'
+
+    try:
+        stdin, stdout, stderr = ssh.exec_command(command)
+    except Exception as e:
+        print("problem")
 
 def detect_hands(image, hands):
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -34,7 +42,11 @@ def detect_hands(image, hands):
 
 
 if __name__=='__main__':
-    hostname = "192.168.43.67"
+    # SSH Connection
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--hostname', type=str, default="192.168.0.250")
+    args = parser.parse_args()
+    hostname = args.hostname
     username = 'pi'
     password = 'raspberry'
     dir_path = '/home/pi/picar-4wd/final_project/control.py'
@@ -51,12 +63,15 @@ if __name__=='__main__':
         exit(2)
         
 
+    # Webcam video capture
     cap = cv2.VideoCapture(0)
     cap.set(3, 1280)
     cap.set(4, 720)
 
     prev_gesture = None
     prev_direction = None
+
+    # User can decide which hand or hands we should take into account
     print("Type how many hands you want to use for gesture control: (1 / 2)")
     num_hands = input()
     if num_hands == "1":
@@ -83,6 +98,7 @@ if __name__=='__main__':
         speed = 0
         angle = 0
         if len(all_landmarks) > 0:
+            # Use gesture reading to update speed and angle
             direction = detect_direction(all_landmarks)
             for hand_command in direction:
                 direction = hand_command[0]
@@ -98,6 +114,7 @@ if __name__=='__main__':
         speed = np.clip(speed, -5, 5)
         angle = np.clip(angle, -5, 5)
         
+        # If there is a change of command we send it to the robot
         if speed != prev_speed or angle != prev_angle:
             send_command(speed, angle, ssh, command)
         prev_speed = speed
