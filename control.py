@@ -30,7 +30,7 @@ try:
 	speed_sign = 1 if speed == 0 else np.sign(speed)
 	actual_speed = powers[np.abs(speed)] * speed_sign
 	# Difference proportional to speed
-	diff = diffs[angle] * (np.abs(speed) + 1) * speed_sign * np.sign(angle)
+	diff = diffs[np.abs(angle)] * (np.abs(speed) + 1) * speed_sign * np.sign(angle)
 	
 	move_turn(actual_speed, diff)	
 	
