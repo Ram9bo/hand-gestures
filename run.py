@@ -71,7 +71,7 @@ if __name__=='__main__':
         hostname = args.hostname
         username = 'pi'
         password = 'raspberry'
-        dir_path = '/home/pi/picar-4wd/final_project/control.py'
+        dir_path = '/home/pi/picar-4wd/final_project/hand-gestures/control.py'
         command = 'python3 ' + dir_path
         try:
             ssh = paramiko.SSHClient()
@@ -82,7 +82,7 @@ if __name__=='__main__':
             exit(1)
         except Exception as e:
             print(e)    
-        exit(2)
+            exit(2)
         
 
     # Webcam video capture
