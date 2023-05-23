@@ -38,28 +38,50 @@ def detect_hands(image, hands):
             marks.append(landmarks)
 
     mp_hands.close()
-    return image, marks
+    return image, np.array(marks)
 
+def annotate_hand(image, direction, fingers, landmarks):
+    image_rows, image_cols, _ = image.shape
+    y = np.amin(landmarks[:,1]) - 0.05
+    x = np.mean(landmarks[:,0]) - 0.05
+    landmark_px = mp.solutions.drawing_utils._normalized_to_pixel_coordinates(x, y,
+                                                                            image_cols, image_rows)
+    image = cv2.putText(image, direction + ": " + str(fingers), landmark_px, cv2.FONT_HERSHEY_SIMPLEX, 
+                        1, (0, 0, 255), 2, cv2.LINE_AA)
+    return image
+
+def annotate_metrics(image, speed, angle):
+    image_rows, image_cols, _ = image.shape
+    y = 0.05
+    x = 0.5 - 0.12
+    px = mp.solutions.drawing_utils._normalized_to_pixel_coordinates(x, y,
+                                                                            image_cols, image_rows)
+    image = cv2.putText(image, "speed: " + str(speed) + ", angle: " + str(angle), px, cv2.FONT_HERSHEY_SIMPLEX, 
+                        1, (0, 0, 0), 2, cv2.LINE_AA)
+    return image
 
 if __name__=='__main__':
     # SSH Connection
     parser = argparse.ArgumentParser()
     parser.add_argument('--hostname', type=str, default="192.168.0.250")
+    parser.add_argument('--no_robot', action="store_true")
     args = parser.parse_args()
-    hostname = args.hostname
-    username = 'pi'
-    password = 'raspberry'
-    dir_path = '/home/pi/picar-4wd/final_project/control.py'
-    command = 'python3 ' + dir_path
-    try:
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(hostname,username=username,password=password)
-    except paramiko.AuthenticationException:
-        print("Failed to connect to %s due to wrong username/password" %hostname)
-        exit(1)
-    except Exception as e:
-        print(e)    
+    robot = not args.no_robot
+    if robot:
+        hostname = args.hostname
+        username = 'pi'
+        password = 'raspberry'
+        dir_path = '/home/pi/picar-4wd/final_project/control.py'
+        command = 'python3 ' + dir_path
+        try:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(hostname,username=username,password=password)
+        except paramiko.AuthenticationException:
+            print("Failed to connect to %s due to wrong username/password" %hostname)
+            exit(1)
+        except Exception as e:
+            print(e)    
         exit(2)
         
 
@@ -91,16 +113,13 @@ if __name__=='__main__':
     while True:
         ret, frame = cap.read()
         frame, all_landmarks = detect_hands(frame, hands)
-        # Display the image with landmarks
-        cv2.imshow('Hand Landmarks', frame)
-        cv2.waitKey(1)
 
         speed = 0
         angle = 0
         if len(all_landmarks) > 0:
             # Use gesture reading to update speed and angle
-            direction = detect_direction(all_landmarks)
-            for hand_command in direction:
+            direction = detect_direction(all_landmarks, frame.shape)
+            for i, hand_command in enumerate(direction):
                 direction = hand_command[0]
                 fingers = hand_command[1]
                 if direction == "up":
@@ -111,11 +130,17 @@ if __name__=='__main__':
                     angle += fingers
                 elif direction == "left":
                     angle -= fingers
+                frame = annotate_hand(frame, direction, fingers, all_landmarks[i])
+
         speed = np.clip(speed, -5, 5)
         angle = np.clip(angle, -5, 5)
-        
+        frame = annotate_metrics(frame, speed, angle)
+        # Display the image with landmarks
+        cv2.imshow('Hand Landmarks', frame)
+        cv2.waitKey(1)
+
         # If there is a change of command we send it to the robot
-        if speed != prev_speed or angle != prev_angle:
+        if (speed != prev_speed or angle != prev_angle) and robot:
             send_command(speed, angle, ssh, command)
         prev_speed = speed
         prev_angle = angle

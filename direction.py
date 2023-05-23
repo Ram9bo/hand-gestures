@@ -1,6 +1,7 @@
 import numpy as np
 
-def detect_direction(all_landmarks):
+def detect_direction(all_landmarks_c, shape):
+    all_landmarks = all_landmarks_c * shape[:2][::-1] 
     detected_directions = []
     # For each hand
     for hand_landmarks in all_landmarks:
@@ -13,6 +14,7 @@ def detect_direction(all_landmarks):
         wrist_pos = hand_landmarks[0]
         big_dist = 0
         big_vect = None
+        most_extended_thumb = False
         for i, tip in enumerate(tips):
             tip_pos = hand_landmarks[tip]
             midfinger_pos = hand_landmarks[midfinger[i]]
@@ -42,6 +44,11 @@ def detect_direction(all_landmarks):
             if dist > big_dist:
                 big_dist = dist
                 big_vect = vector
+                most_extended_thumb = (tip == 4)
+        # The thumb tip is not aligned with wrist -> we square the image
+        # so that it is more aligned
+        if most_extended_thumb:
+            big_vect /= shape[:2][::-1]
         # Find direction of most extended finger
         coord = np.argmax(np.abs(big_vect))
         coord = coord + 2 if big_vect[coord] < 0 else coord
